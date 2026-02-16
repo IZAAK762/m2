@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #F4F6F8;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 14px;
+  margin-top: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.title {
+  color: #0B1F3B;
+}
+
+.btn {
+  background: #1F4E79;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #163a5c;
+}
+
+.header{
+  background:#0B1F3B;
+  color:white;
+  padding:16px;
+  font-weight:600;
+  font-size:20px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.sub{
+  font-size:12px;
+  opacity:.7;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #d0d7de;
+  box-sizing:border-box;
+}
+
+button{
+  margin-top:10px;
+}
+
+.card{
+  background:white;
+  padding:14px;
+  border-radius:14px;
+  margin-top:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  border-left:6px solid #ccc;
+}
+
+.card.ok{
+  border-left:6px solid #1FA971;
+}
+
+.card.alto{
+  border-left:6px solid #D64545;
+}
+
+.card.baixo{
+  border-left:6px solid #2D7FF9;
+}
+
+.card.resumo{
+  background:#F4F7FB;
+  color:#0B1F3B;
+  border-left:6px solid #1F4E79;
+  box-shadow:none;
+}
