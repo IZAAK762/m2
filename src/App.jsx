@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export default function App() {
   const [busca, setBusca] = useState("");
@@ -17,34 +19,42 @@ export default function App() {
   });
 
   useEffect(() => {
-    const dados = localStorage.getItem("m2_base");
-    if (dados) setImoveis(JSON.parse(dados));
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("m2_base", JSON.stringify(imoveis));
-  }, [imoveis]);
+  async function carregar(){
+    const snapshot = await getDocs(collection(db, "imoveis"));
+    const lista = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setImoveis(lista);
+  }
+  carregar();
+}, []);
 
   function calcularM2(area, preco) {
     if (!area || !preco) return "";
     return (preco / area).toFixed(2);
   }
 
-  function adicionar() {
-    if(!usuario) return alert("Informe seu nome");
+async function adicionar() {
+  if(!usuario) return alert("Informe seu nome");
 
-    const m2 = calcularM2(Number(form.area), Number(form.preco));
+  const m2 = calcularM2(Number(form.area), Number(form.preco));
 
-    const registro = {
-      ...form,
-      id: Date.now(),
-      responsavel: usuario,
-      m2,
-      data: new Date().toISOString().slice(0,10),
-      favorito:false
-    };
+  const registro = {
+    condominio: form.condominio,
+    bairro: form.bairro,
+    area: form.area,
+    preco: form.preco,
+    data: new Date().toISOString().slice(0,10),
+    fonte: "Profissional",
+    responsavel: usuario,
+    m2,
+    favorito:false
+  };
 
-    setImoveis([...imoveis, registro]);
+  try{
+    const docRef = await addDoc(collection(db, "imoveis"), registro);
+    setImoveis(prev => [...prev, { id: docRef.id, ...registro }]);
 
     setForm({
       condominio: "",
@@ -54,11 +64,17 @@ export default function App() {
       data: new Date().toISOString().slice(0,10),
       fonte: "Profissional"
     });
-  }
 
-  function remover(id){
-    setImoveis(imoveis.filter(i => i.id !== id));
+  }catch(e){
+    console.error(e);
+    alert("Erro ao salvar no banco");
   }
+}
+
+  async function remover(id){
+  await deleteDoc(doc(db, "imoveis", id));
+  setImoveis(imoveis.filter(i => i.id !== id));
+}
 
   function mediaCondominio(nome){
     const lista = imoveis.filter(i=>i.condominio===nome).map(i=>Number(i.m2));
