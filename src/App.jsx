@@ -8,6 +8,7 @@ export default function App() {
   const [busca, setBusca] = useState("");
   const [imoveis, setImoveis] = useState([]);
   const [usuario, setUsuario] = useState(localStorage.getItem("m2_usuario") || "");
+  const [modo, setModo] = useState("visitante");
 
   const [form, setForm] = useState({
     condominio: "",
@@ -394,11 +395,25 @@ function resumoGeral(){
         <div className="sub">índice imobiliário local</div>
       </div>
 
-      <h2 style={{marginTop:"20px"}}>Novo registro</h2>
+      <div style={{marginTop:"15px"}}>
+  <button onClick={()=>setModo("visitante")}>Modo Visitante</button>
+  <button onClick={()=>setModo("admin")} style={{marginLeft:"10px"}}>
+    Modo Admin
+  </button>
+</div>
+
+{modo === "admin" && (
+<>
+  
+  <h2 style={{marginTop:"20px"}}>Novo registro</h2>
 
       <input placeholder="Seu nome"
         value={usuario}
         onChange={e=>setUsuario(e.target.value)} />
+  
+</>
+)}
+      
 
       <br/><br/>
 
@@ -480,11 +495,15 @@ function resumoGeral(){
             {diagnostico(i).texto}
           </div>
           <br/>
-          <button onClick={()=>gerarPDF(i)}>PDF</button>
-          <button onClick={()=>remover(i.id)}>Excluir</button>
-          <button onClick={()=>toggleFavorito(i.id)}>
-  {i.favorito ? "★ Favorito" : "☆ Favoritar"}
-</button>
+          {modo === "admin" && (
+<>
+  <button onClick={()=>gerarPDF(i)}>PDF</button>
+  <button onClick={()=>remover(i.id)}>Excluir</button>
+  <button onClick={()=>toggleFavorito(i.id)}>
+    {i.favorito ? "★ Favorito" : "☆ Favoritar"}
+  </button>
+</>
+)}
           <button onClick={adicionar}>Salvar</button>
           <button className="btn" onClick={exportarBase}>Backup</button>
         </div>
