@@ -9,6 +9,7 @@ export default function App() {
   const [imoveis, setImoveis] = useState([]);
   const [usuario, setUsuario] = useState(localStorage.getItem("m2_usuario") || "");
   const [modo, setModo] = useState("visitante");
+  const SENHA_ADMIN = "m2master";
 
   const [form, setForm] = useState({
     condominio: "",
@@ -397,46 +398,65 @@ function resumoGeral(){
 
       <div style={{marginTop:"15px"}}>
   <button onClick={()=>setModo("visitante")}>Modo Visitante</button>
-  <button onClick={()=>setModo("admin")} style={{marginLeft:"10px"}}>
-    Modo Admin
-  </button>
+  <button
+  onClick={()=>{
+    const senha = prompt("Digite a senha de administrador:");
+    if(senha === SENHA_ADMIN){
+      setModo("admin");
+    }else{
+      alert("Senha incorreta");
+    }
+  }}
+  style={{marginLeft:"10px"}}
+>
+  Modo Admin
+</button>
 </div>
 
 {modo === "admin" && (
 <>
-  
   <h2 style={{marginTop:"20px"}}>Novo registro</h2>
 
-      <input placeholder="Seu nome"
-        value={usuario}
-        onChange={e=>setUsuario(e.target.value)} />
-  
+  <input
+    placeholder="Seu nome"
+    value={usuario}
+    onChange={e=>setUsuario(e.target.value)}
+  />
+
+  <br/><br/>
+
+  <input
+    placeholder="Condomínio"
+    value={form.condominio}
+    onChange={e=>setForm({...form, condominio:e.target.value})}
+  />
+
+  <input
+    placeholder="Bairro"
+    value={form.bairro}
+    onChange={e=>setForm({...form, bairro:e.target.value})}
+  />
+
+  <input
+    type="number"
+    placeholder="Área m²"
+    value={form.area}
+    onChange={e=>setForm({...form, area:e.target.value})}
+  />
+
+  <input
+    type="number"
+    placeholder="Preço"
+    value={form.preco}
+    onChange={e=>setForm({...form, preco:e.target.value})}
+  />
+
+  <button className="btn" onClick={adicionar}>Salvar</button>
+  <input type="file" onChange={importarBase} />
+
+  <hr/>
 </>
 )}
-      
-
-      <br/><br/>
-
-      <input placeholder="Condomínio"
-        value={form.condominio}
-        onChange={e=>setForm({...form, condominio:e.target.value})} />
-
-      <input placeholder="Bairro"
-        value={form.bairro}
-        onChange={e=>setForm({...form, bairro:e.target.value})} />
-
-      <input type="number" placeholder="Área m²"
-        value={form.area}
-        onChange={e=>setForm({...form, area:e.target.value})} />
-
-      <input type="number" placeholder="Preço"
-        value={form.preco}
-        onChange={e=>setForm({...form, preco:e.target.value})} />
-
-      <button className="btn" onClick={adicionar}>Salvar</button>
-      <input type="file" onChange={importarBase} />
-
-      <hr/>
 
       <h2 style={{marginTop:"30px"}}>Analisar mercado</h2>
 
@@ -502,10 +522,11 @@ function resumoGeral(){
   <button onClick={()=>toggleFavorito(i.id)}>
     {i.favorito ? "★ Favorito" : "☆ Favoritar"}
   </button>
+  <button onClick={adicionar}>Salvar</button>
+          <button className="btn" onClick={exportarBase}>Backup</button>
 </>
 )}
-          <button onClick={adicionar}>Salvar</button>
-          <button className="btn" onClick={exportarBase}>Backup</button>
+          
         </div>
       ))}
 
