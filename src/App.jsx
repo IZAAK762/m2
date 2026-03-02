@@ -1,3 +1,11 @@
+/*     
+
+Formatar texto de preço para conversão automatica de valores
+Criar login real com usuario e senha, e associar cada registro a um usuário específico
+Melhorar a interface do cliente, deixando mais amigável e responsiva
+
+*/
+
 import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -382,6 +390,64 @@ function resumoGeral(){
   };
 }
 
+function painelEstrategico(){
+  if(imoveis.length === 0) return null;
+
+  const valores = imoveis.map(i => Number(i.m2)).filter(Boolean);
+  const mediaGeral = valores.reduce((a,b)=>a+b,0)/valores.length;
+
+  const ranking = rankingCondominios();
+  const topo = ranking.length ? ranking[0] : null;
+
+  const oportunidadesLista = oportunidades();
+  const melhorOportunidade = oportunidadesLista.length
+    ? oportunidadesLista[0]
+    : null;
+
+  return {
+    mediaGeral,
+    topo,
+    melhorOportunidade
+  };
+}
+
+function calcularFaixaJusta(nomeCondominio){
+  const lista = imoveis
+    .filter(i => i.condominio === nomeCondominio && i.m2)
+    .map(i => Number(i.m2));
+
+  if(lista.length < 2) return null;
+
+  const media = lista.reduce((a,b)=>a+b,0)/lista.length;
+
+  const minimo = media * 0.92;  // -8%
+  const maximo = media * 1.08;  // +8%
+
+  return {
+    media,
+    minimo,
+    maximo
+  };
+}
+
+function seloFaixaJusta(imovel){
+  const faixa = calcularFaixaJusta(imovel.condominio);
+  if(!faixa) return null;
+
+  const valor = Number(imovel.m2);
+
+  if(valor > faixa.maximo){
+    return { texto: "🔴 Acima da Faixa Justa", cor: "#D64545" };
+  }
+
+  if(valor < faixa.minimo){
+    return { texto: "🔵 Oportunidade Abaixo da Faixa", cor: "#2D7FF9" };
+  }
+
+  return { texto: "🟢 Dentro da Faixa Justa", cor: "#1FA971" };
+}
+
+
   return (
     <div className="container">
       <div className="header">
@@ -412,6 +478,36 @@ function resumoGeral(){
   Modo Admin
 </button>
 </div>
+
+{modo === "visitante" && painelEstrategico() && (
+  <div className="card" style={{
+    marginTop:"20px",
+    background:"#0B1F3B",
+    color:"white"
+  }}>
+    <h2>Painel Estratégico do Mercado</h2>
+
+    <div style={{marginTop:"10px"}}>
+      <b>Média geral:</b> R$ {painelEstrategico().mediaGeral.toFixed(0)}/m²
+    </div>
+
+    {painelEstrategico().topo && (
+      <div style={{marginTop:"10px"}}>
+        <b>Condomínio mais valorizado:</b> {painelEstrategico().topo.nome}
+        <br/>
+        R$ {painelEstrategico().topo.media.toFixed(0)}/m²
+      </div>
+    )}
+
+    {painelEstrategico().melhorOportunidade && (
+      <div style={{marginTop:"10px"}}>
+        <b>Melhor oportunidade:</b> {painelEstrategico().melhorOportunidade.condominio}
+        <br/>
+        R$ {painelEstrategico().melhorOportunidade.m2}/m²
+      </div>
+    )}
+  </div>
+)}
 
 {modo === "admin" && (
 <>
@@ -473,6 +569,15 @@ function resumoGeral(){
     Média: R$ {resumoBusca().media.toFixed(0)}/m²<br/>
     Registros: {resumoBusca().qtd}<br/>
 
+    {calcularFaixaJusta(resumoBusca().nome) && (
+  <div style={{marginTop:"10px"}}>
+    <b>🎯 Faixa Justa:</b><br/>
+    R$ {calcularFaixaJusta(resumoBusca().nome).minimo.toFixed(0)}
+    {" "}até{" "}
+    R$ {calcularFaixaJusta(resumoBusca().nome).maximo.toFixed(0)} / m²
+  </div>
+)}
+
     {resumoBusca().tendencia !== null && (
       <>Tendência: {resumoBusca().tendencia.toFixed(1)}%</>
     )}</div>
@@ -505,6 +610,17 @@ function resumoGeral(){
           <b>{i.condominio}</b> - {i.bairro} <br/>
           
           <div><b>m²:</b> R$ {i.m2}</div>
+
+          {seloFaixaJusta(i) && (
+  <div style={{
+    marginTop:"5px",
+    fontWeight:"bold",
+    color: seloFaixaJusta(i).cor
+  }}>
+    {seloFaixaJusta(i).texto}
+  </div>
+)}
+
           {tendenciaCondominio(i.condominio) !== null && (
   <div style={{fontWeight:"bold"}}>
     Tendência: {tendenciaCondominio(i.condominio).toFixed(1)}%
